@@ -10,8 +10,7 @@
 patient=$1 
 #Timestamp initial (using for log file name)
 timestamp_initial=$2
-#anat data
-anat=/project/data/${patient}/anat/*.nii.gz
+
 #dwi data
 dwi=/project/data/${patient}/dwi/*.nii.gz
 bvals=/project/data/${patient}/dwi/*.bval
@@ -34,17 +33,27 @@ mkdir -p /project/Preproc/Dwiprep/${patient}
 cd /project/Preproc/Dwiprep/${patient}
 mkdir -p qc_data
 
+timepoint=$(date +"%H:%M")
+echo "$timepoint    **Starting Preprocessing...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+
 #Denoising dwi data
 dwidenoise $dwi dwi_den.nii.gz
 dwipreproc -rpe_none -pe_dir $direction -readout_time $rd_time -fslgrad $bvecs $bvals \
     -eddyqc_all qc_data -eddy_options ' --ol_nstd=4 --repol --cnr_maps ' \
-    -nthreads 4 -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz
+    -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz
 
 #Generating dwi mask
 dwi2mask dwi_clean.nii.gz dwi_mask.nii.gz -fslgrad rotated.bvec rotated.bval
 
+timepoint=$(date +"%H:%M")
+echo "$timepoint    **Tensor fitting...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
 #Tensor fitting
-dtifit --data=dwi_clean.nii.gz --out=dwi --mask=dwi_mask.nii.gz --bvecs=rotated.bvec --bvals=rotated.bval
+dwi2tensor -force -mask dwi_mask.nii.gz dwi_clean.nii.gz -fslgrad rotated.bvec rotated.bval dwi_tensor.nii.gz
+tensor2metric -force -mask dwi_mask.nii.gz -vector dwi_directions.nii.gz dwi_tensor.nii.gz
+tensor2metric -force -mask dwi_mask.nii.gz -fa dwi_FA.nii.gz dwi_tensor.nii.gz
+tensor2metric -force -mask dwi_mask.nii.gz -adc dwi_MD.nii.gz dwi_tensor.nii.gz
+tensor2metric -force -mask dwi_mask.nii.gz -ad dwi_AD.nii.gz dwi_tensor.nii.gz
+tensor2metric -force -mask dwi_mask.nii.gz -rd dwi_RD.nii.gz dwi_tensor.nii.gz
 
 #Generate quality checks
 mv dwipreproc-tmp-* dwiprep_files
