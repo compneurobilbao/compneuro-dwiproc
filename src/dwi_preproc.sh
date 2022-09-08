@@ -21,13 +21,6 @@ json=/project/data/${patient}/dwi/*.json
 rd_time=$(grep "TotalReadoutTime" $json | awk '{ print $2 }' | sed 's/,//g')
 pe_direction=$(grep "PhaseEncodingDirection" $json | awk '{ print $2 }' | sed 's/,//g' | sed 's/"//g')
 
-if [[ $pe_direction = "j" ]]
-then
-    direction="AP"
-else
-    direction="PA"
-fi
-
 #Creating participant preproc folder
 mkdir -p /project/Preproc/Dwiprep/${patient}
 cd /project/Preproc/Dwiprep/${patient}
@@ -38,9 +31,30 @@ echo "$timepoint    **Starting Preprocessing...**" >> /app/log/Dwipreproc_${time
 
 #Denoising dwi data
 dwidenoise $dwi dwi_den.nii.gz
-dwipreproc -rpe_none -pe_dir $direction -readout_time $rd_time -fslgrad $bvecs $bvals \
+
+#Preproc dwi data
+#Check if fieldmapping data has been acquired to perform topup correction
+if [  -d "/project/data/${patient}/fmap" ]; then
+
+    timepoint=$(date +"%H:%M")
+    echo "$timepoint    **Using topup for fieldmapping correction...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+
+    dwi_ap=/project/data/${patient}/fmap/*SEfmapDWI_dir-AP_epi.nii.gz
+    dwi_pa=/project/data/${patient}/fmap/*SEfmapDWI_dir-PA_epi.nii.gz
+    fslmerge -t /project/data/${patient}/fmap/dwi_topup ${dwi_ap} ${dwi_pa}
+    topimg=/project/data/${patient}/fmap/dwi_topup.nii.gz
+
+    dwipreproc -rpe_pair -pe_dir $pe_direction -readout_time $rd_time -fslgrad $bvecs $bvals \
     -eddyqc_all qc_data -eddy_options ' --ol_nstd=4 --repol --cnr_maps ' \
-    -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz
+    -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz \
+    -se_epi $topimg -align_seepi
+else
+    timepoint=$(date +"%H:%M")
+    echo "$timepoint    **Fieldmapping folder not found, not performing topup correction...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+    dwipreproc -rpe_none -pe_dir $pe_direction -readout_time $rd_time -fslgrad $bvecs $bvals \
+        -eddyqc_all qc_data -eddy_options ' --ol_nstd=4 --repol --cnr_maps ' \
+        -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz
+fi
 
 #Generating dwi mask
 dwi2mask dwi_clean.nii.gz dwi_mask.nii.gz -fslgrad rotated.bvec rotated.bval

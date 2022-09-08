@@ -22,7 +22,7 @@ do
         echo "*********************" >> /app/log/Dwipreproc_${timestamp_initial}.txt
  
         source /app/src/dwi_preproc.sh $participant $timestamp_initial
-        source /app/src/dwi_tract.sh $participant $timestamp_initial craddock_lob_2308_2mm_HCP
+        source /app/src/dwi_tract.sh $participant $timestamp_initial craddock_2128_2mm
 
    fi
 	
