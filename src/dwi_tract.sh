@@ -12,8 +12,6 @@ patient=$1
 timestamp_initial=$2
 #Partition for SC matrix calculation (placed in brain_templates)
 partition=$3
-#anat data
-anat=/project/data/${patient}/anat/*.nii.gz
 
 cd /project/Preproc/Dwiprep/${patient}
 
