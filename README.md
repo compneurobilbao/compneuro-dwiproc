@@ -65,7 +65,7 @@ sudo make dev
 
 The main outputs will be placed in the folder `/path/to/your/project/Preproc/Dwiprep`
 
-Inside, you will find a subfolder for each subject with the tensor-fitted images (i.e. Fractional anisotropy *dwi_FA.nii.gz*, Medial diffusivity *dwi_MD.nii.gz*, Radial diffusivity *dwi_RD.nii.gz*, and Axial diffusivity *dwi_AD.nii.gz*. Furthermore you will find the SC matrices of the probabilistic *iFOD2* and deterministic *FACT* tractographies with the fiber counting in the partition introduced as input.
+Inside, you will find a subfolder for each subject with the tensor-fitted images (i.e. Fractional anisotropy *dwi_FA.nii.gz*, Medial diffusivity *dwi_MD.nii.gz*, Radial diffusivity *dwi_RD.nii.gz*, and Axial diffusivity *dwi_AD.nii.gz*). Furthermore you will find the SC matrices of the probabilistic *iFOD2* and deterministic *FACT* tractographies containing the fiber counting in the partition introduced as input.
 
 ## Cite
 Please, if you want to use this code in your publications, cite this work:
