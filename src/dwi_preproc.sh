@@ -56,6 +56,10 @@ else
         -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz
 fi
 
+#Generating bzero
+dwiextract -bzero -fslgrad rotated.bvec rotated.bval dwi_clean.nii.gz dwi_bzero_4D.nii.gz
+fslmaths dwi_bzero_4D.nii.gz -Tmean dwi_bzero.nii.gz
+
 #Generating dwi mask
 dwi2mask dwi_clean.nii.gz dwi_mask.nii.gz -fslgrad rotated.bvec rotated.bval
 

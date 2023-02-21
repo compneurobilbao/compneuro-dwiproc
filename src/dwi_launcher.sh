@@ -9,6 +9,7 @@
 
 timestamp_initial=$(date +"%H:%M")
 touch /app/log/Dwipreproc_${timestamp_initial}.txt
+partition=$1
 
 while read line
 do
@@ -20,10 +21,9 @@ do
         echo "*********************" >> /app/log/Dwipreproc_${timestamp_initial}.txt
         echo "$participant" >> /app/log/Dwipreproc_${timestamp_initial}.txt
         echo "*********************" >> /app/log/Dwipreproc_${timestamp_initial}.txt
- 
-        source /app/src/dwi_preproc.sh $participant $timestamp_initial
-        source /app/src/dwi_tract.sh $participant $timestamp_initial craddock_2128_2mm
 
+        source /app/src/dwi_preproc.sh $participant $timestamp_initial
+        source /app/src/dwi_tract.sh $participant $timestamp_initial $partition
    fi
 	
 done < /project/data/participants.tsv
