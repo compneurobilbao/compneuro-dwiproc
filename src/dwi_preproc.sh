@@ -18,8 +18,8 @@ bvecs=/project/data/${patient}/dwi/*.bvec
 json=/project/data/${patient}/dwi/*.json
 
 #Readout Time and phase encoding direction
-rd_time=$(grep "TotalReadoutTime" $json | awk '{ print $2 }' | sed 's/,//g')
-pe_direction=$(grep "PhaseEncodingDirection" $json | awk '{ print $2 }' | sed 's/,//g' | sed 's/"//g')
+rd_time=$(jq .TotalReadoutTime $json)
+pe_direction=$(jq .PhaseEncodingDirection $json | sed 's/"//g')
 
 #Creating participant preproc folder
 mkdir -p /project/Preproc/Dwiprep/${patient}
