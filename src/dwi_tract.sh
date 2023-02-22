@@ -22,9 +22,9 @@ echo "$timepoint    **Registering partition to subject space...**" >> /app/log/D
 
 mkdir -p dwireg
 
-epi_reg --epi=dwi_bzero.nii.gz --t1=anat --t1brain=anat --out=dwireg/epi2anat
+epi_reg --epi=dwi_bzero.nii.gz --t1=${anat} --t1brain=${anat} --out=dwireg/epi2anat
 convert_xfm -inverse -omat dwireg/anat2epi.mat dwireg/epi2anat.mat
-flirt -in anat -ref dwi_bzero.nii.gz -init dwireg/anat2epi.mat -applyxfm -out anat_dwispace.nii.gz
+flirt -in ${anat} -ref dwi_bzero.nii.gz -init dwireg/anat2epi.mat -applyxfm -out anat_dwispace.nii.gz
 
 antsRegistrationSyN.sh -d 3 \
 	-f anat_dwispace.nii.gz \
