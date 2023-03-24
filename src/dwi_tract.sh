@@ -66,7 +66,7 @@ tck2connectome -zero_diagonal -symmetric -assignment_radial_search 5 \
 timepoint=$(date +"%H:%M")
 echo "$timepoint    **Computing deterministic tractography (FACT)...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
 
-tckgen -backtrack -seed_gmwmi GMWMI.nii.gz -angle 45 -act act.nii.gz -mask dwi_mask.nii.gz \
+tckgen -seed_gmwmi GMWMI.nii.gz -angle 45 -act act.nii.gz -mask dwi_mask.nii.gz \
     -maxlength 200 -select 3000000 -algorithm FACT -downsample 5 -force \
     dwi_directions.nii.gz streamlines_FACT.tck
 tcksift2 streamlines_FACT.tck dwi_fod.nii.gz sift_weights_FACT.txt -force
