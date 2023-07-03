@@ -18,8 +18,18 @@ bvecs=/project/data/${patient}/dwi/*.bvec
 json=/project/data/${patient}/dwi/*.json
 
 #Readout Time and phase encoding direction
-rd_time=$(jq .TotalReadoutTime $json)
-pe_direction=$(jq .PhaseEncodingDirection $json | sed 's/"//g')
+if [ $(jq .TotalReadoutTime $json) == "null" ]; then
+    rd_time=$(jq .EstimatedTotalReadoutTime $json)
+else
+    rd_time=$(jq .TotalReadoutTime $json)
+fi
+
+if [ $(jq .PhaseEncodingDirection $json | sed 's/"//g') == "null" ]; then
+    pe_direction=$(jq .PhaseEncodingAxis $json | sed 's/"//g')
+else
+    pe_direction=$(jq .PhaseEncodingDirection $json | sed 's/"//g')
+fi
+
 
 #Creating participant preproc folder
 mkdir -p /project/Preproc/Dwiprep/${patient}
@@ -46,13 +56,13 @@ if [  -d "/project/data/${patient}/fmap" ]; then
 
     dwipreproc -rpe_pair -pe_dir $pe_direction -readout_time $rd_time -fslgrad $bvecs $bvals \
     -eddyqc_all qc_data -eddy_options ' --ol_nstd=4 --repol --cnr_maps ' \
-    -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz \
+    -export_grad_fsl -nthreads 4 rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz \
     -se_epi $topimg -align_seepi
 else
     timepoint=$(date +"%H:%M")
     echo "$timepoint    **Fieldmapping folder not found, not performing topup correction...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
     dwipreproc -rpe_none -pe_dir $pe_direction -readout_time $rd_time -fslgrad $bvecs $bvals \
-        -eddyqc_all qc_data -eddy_options ' --ol_nstd=4 --repol --cnr_maps ' \
+        -eddyqc_all qc_data -nthreads 4 -eddy_options ' --ol_nstd=4 --repol --cnr_maps ' \
         -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz
 fi
 
