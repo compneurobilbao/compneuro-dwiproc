@@ -44,13 +44,14 @@ RUN export ND_ENTRYPOINT="/neurodocker/startup.sh" \
 
 ENTRYPOINT ["/neurodocker/startup.sh"]
 
-ENV ANTSPATH="/opt/ants-2.3.1" \
-    PATH="/opt/ants-2.3.1:$PATH"
+ENV ANTSPATH="/opt/ants-2.4.1" \
+    PATH="/opt/ants-2.4.1:$PATH"
 RUN echo "Downloading ANTs ..." \
-    && mkdir -p /opt/ants-2.3.1 \
-    && curl -fsSL --retry 5 https://dl.dropbox.com/s/1xfhydsf4t4qoxg/ants-Linux-centos6_x86_64-v2.3.1.tar.gz \
-    | tar -xz -C /opt/ants-2.3.1 --strip-components 1
-
+    && curl -fsSL --retry 5 https://github.com/ANTsX/ANTs/releases/download/v2.4.1/ants-2.4.1-centos7-X64-gcc.zip -o ants.zip \
+    && unzip ants.zip -d /opt \
+    && mv /opt/ants-2.4.1/bin/* /opt/ants-2.4.1/ \
+    && rm ants.zip
+    
 ENV FSLDIR="/opt/fsl-6.0.1" \
     PATH="/opt/fsl-6.0.1/bin:$PATH" \
     FSLOUTPUTTYPE="NIFTI_GZ" \
@@ -79,30 +80,19 @@ RUN apt-get update -qq \
            libxrandr2 \
            libxrender1 \
            libxt6 \
+           python3 \
            sudo \
            wget \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && echo "Downloading FSL ..." \
-    && mkdir -p /opt/fsl-6.0.1 \
-    && curl -fsSL --retry 5 https://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-6.0.1-centos6_64.tar.gz \
-    | tar -xz -C /opt/fsl-6.0.1 --strip-components 1 \
-    && sed -i '$iecho Some packages in this Docker container are non-free' $ND_ENTRYPOINT \
-    && sed -i '$iecho If you are considering commercial use of this container, please consult the relevant license:' $ND_ENTRYPOINT \
-    && sed -i '$iecho https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Licence' $ND_ENTRYPOINT \
-    && sed -i '$isource $FSLDIR/etc/fslconf/fsl.sh' $ND_ENTRYPOINT \
-    && echo "Installing FSL conda environment ..." \
-    && bash /opt/fsl-6.0.1/etc/fslconf/fslpython_install.sh -f /opt/fsl-6.0.1 \
-    && echo "Downgrading deprecation module per https://github.com/kaczmarj/neurodocker/issues/271#issuecomment-514523420" \
-    && /opt/fsl-6.0.1/fslpython/bin/conda install -n fslpython -c conda-forge -y deprecation==1.* \
-    && echo "Removing bundled with FSLeyes libz likely incompatible with the one from OS" \
-    && rm -f /opt/fsl-6.0.1/bin/FSLeyes/libz.so.1
+    && rm -rf /var/lib/apt/lists/*
+RUN echo "Installing FSL ..." \
+    && curl -fsSL https://fsl.fmrib.ox.ac.uk/fsldownloads/fslconda/releases/fslinstaller.py | python3 - -d /opt/fsl-6.0.7.6 -V 6.0.7.6
 
-ENV PATH="/opt/mrtrix3-3.0_RC3/bin:$PATH"
+ENV PATH="/opt/mrtrix3-3.0.4/bin:$PATH"
 RUN echo "Downloading MRtrix3 ..." \
-    && mkdir -p /opt/mrtrix3-3.0_RC3 \
-    && curl -fsSL --retry 5 https://dl.dropbox.com/s/2oh339ehcxcf8xf/mrtrix3-3.0_RC3-Linux-centos6.9-x86_64.tar.gz \
-    | tar -xz -C /opt/mrtrix3-3.0_RC3 --strip-components 1
+    && mkdir -p /opt/mrtrix3-3.0.4 \
+    && curl -fsSL --retry 5 https://github.com/MRtrix3/mrtrix3/releases/download/3.0.4/conda-linux-mrtrix3-3.0.4-h2bc3f7f_0.tar.bz2 \
+    | tar -xj -C /opt/mrtrix3-3.0.4 --strip-components 1
 
 ENV C3DPATH="/opt/convert3d-1.0.0" \
     PATH="/opt/convert3d-1.0.0/bin:$PATH"
@@ -138,7 +128,7 @@ RUN echo '{ \
     \n    [ \
     \n      "ants", \
     \n      { \
-    \n        "version": "2.3.1", \
+    \n        "version": "2.4.1", \
     \n        "method": "binaries" \
     \n      } \
     \n    ], \
@@ -152,7 +142,7 @@ RUN echo '{ \
     \n    [ \
     \n      "mrtrix3", \
     \n      { \
-    \n        "version": "3.0_RC3", \
+    \n        "version": "3.0.4", \
     \n        "method": "binaries" \
     \n      } \
     \n    ], \
@@ -172,6 +162,3 @@ RUN echo '{ \
     \n    ] \
     \n  ] \
     \n}' > /neurodocker/neurodocker_specs.json
-
-WORKDIR /app
-COPY . /app
