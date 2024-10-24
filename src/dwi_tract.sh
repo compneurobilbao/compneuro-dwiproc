@@ -18,7 +18,7 @@ cd /project/Preproc/Dwiprep/${participant}
 
 #Atlas Registration
 timepoint=$(date +"%H:%M")
-echo "$timepoint    **Registering partition to subject space...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+echo "$timepoint    **Registering partition to subject space...**" >> /project/log/Dwipreproc_${timestamp_initial}.txt
 
 mkdir -p dwireg
 
@@ -46,7 +46,7 @@ echo "$timepoint    **Generating ACT files...**"
 
 #IFOD2 probabilistic tractography
 timepoint=$(date +"%H:%M")
-echo "$timepoint    **Computing probabilistic tractography (iFOD2)...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+echo "$timepoint    **Computing probabilistic tractography (iFOD2)...**" >> /project/log/Dwipreproc_${timestamp_initial}.txt
 
 #Generating response for spherical deconvolution
 dwi2response tax dwi_clean.nii.gz dwi_response.txt -fslgrad rotated.bvec rotated.bval -mask dwi_mask.nii.gz -force
@@ -64,7 +64,7 @@ tck2connectome -zero_diagonal -symmetric -assignment_radial_search 5 \
 
 #FACT deterministic tractography
 timepoint=$(date +"%H:%M")
-echo "$timepoint    **Computing deterministic tractography (FACT)...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+echo "$timepoint    **Computing deterministic tractography (FACT)...**" >> /project/log/Dwipreproc_${timestamp_initial}.txt
 
 tckgen -seed_gmwmi GMWMI.nii.gz -angle 45 -act act.nii.gz -mask dwi_mask.nii.gz \
     -maxlength 200 -select 3000000 -algorithm FACT -downsample 5 -force \

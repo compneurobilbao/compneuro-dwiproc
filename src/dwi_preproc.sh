@@ -37,7 +37,7 @@ cd /project/Preproc/Dwiprep/${patient}
 mkdir -p qc_data
 
 timepoint=$(date +"%H:%M")
-echo "$timepoint    **Starting Preprocessing...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+echo "$timepoint    **Starting Preprocessing...**" >> /project/log/Dwipreproc_${timestamp_initial}.txt
 
 #Denoising dwi data
 dwidenoise $dwi dwi_den.nii.gz
@@ -47,7 +47,7 @@ dwidenoise $dwi dwi_den.nii.gz
 if [  -d "/project/data/${patient}/fmap" ]; then
 
     timepoint=$(date +"%H:%M")
-    echo "$timepoint    **Using topup for fieldmapping correction...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+    echo "$timepoint    **Using topup for fieldmapping correction...**" >> /project/log/Dwipreproc_${timestamp_initial}.txt
 
     dwi_ap=/project/data/${patient}/fmap/*SEfmapDWI_dir-AP_epi.nii.gz
     dwi_pa=/project/data/${patient}/fmap/*SEfmapDWI_dir-PA_epi.nii.gz
@@ -60,7 +60,7 @@ if [  -d "/project/data/${patient}/fmap" ]; then
     -se_epi $topimg -align_seepi
 else
     timepoint=$(date +"%H:%M")
-    echo "$timepoint    **Fieldmapping folder not found, not performing topup correction...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+    echo "$timepoint    **Fieldmapping folder not found, not performing topup correction...**" >> /project/log/Dwipreproc_${timestamp_initial}.txt
     dwipreproc -rpe_none -pe_dir $pe_direction -readout_time $rd_time -fslgrad $bvecs $bvals \
         -eddyqc_all qc_data -nthreads 4 -eddy_options ' --ol_nstd=4 --repol --cnr_maps ' \
         -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz
@@ -74,7 +74,7 @@ fslmaths dwi_bzero_4D.nii.gz -Tmean dwi_bzero.nii.gz
 dwi2mask dwi_clean.nii.gz dwi_mask.nii.gz -fslgrad rotated.bvec rotated.bval
 
 timepoint=$(date +"%H:%M")
-echo "$timepoint    **Tensor fitting...**" >> /app/log/Dwipreproc_${timestamp_initial}.txt
+echo "$timepoint    **Tensor fitting...**" >> /project/log/Dwipreproc_${timestamp_initial}.txt
 #Tensor fitting
 dwi2tensor -force -mask dwi_mask.nii.gz dwi_clean.nii.gz -fslgrad rotated.bvec rotated.bval dwi_tensor.nii.gz
 tensor2metric -force -mask dwi_mask.nii.gz -vector dwi_directions.nii.gz dwi_tensor.nii.gz
