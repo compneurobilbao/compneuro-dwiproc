@@ -54,14 +54,14 @@ if [  -d "/project/data/${patient}/fmap" ]; then
     fslmerge -t /project/data/${patient}/fmap/dwi_topup ${dwi_ap} ${dwi_pa}
     topimg=/project/data/${patient}/fmap/dwi_topup.nii.gz
 
-    dwipreproc -rpe_pair -pe_dir $pe_direction -readout_time $rd_time -fslgrad $bvecs $bvals \
+    dwifslpreproc -rpe_pair -pe_dir $pe_direction -readout_time $rd_time -fslgrad $bvecs $bvals \
     -eddyqc_all qc_data -eddy_options ' --ol_nstd=4 --repol --cnr_maps ' \
     -export_grad_fsl -nthreads 4 rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz \
     -se_epi $topimg -align_seepi
 else
     timepoint=$(date +"%H:%M")
     echo "$timepoint    **Fieldmapping folder not found, not performing topup correction...**" >> /project/log/Dwipreproc_${timestamp_initial}.txt
-    dwipreproc -rpe_none -pe_dir $pe_direction -readout_time $rd_time -fslgrad $bvecs $bvals \
+    dwifslpreproc -rpe_none -pe_dir $pe_direction -readout_time $rd_time -fslgrad $bvecs $bvals \
         -eddyqc_all qc_data -nthreads 4 -eddy_options ' --ol_nstd=4 --repol --cnr_maps ' \
         -export_grad_fsl rotated.bvec rotated.bval dwi_den.nii.gz dwi_clean.nii.gz
 fi
