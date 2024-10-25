@@ -82,7 +82,3 @@ tensor2metric -force -mask dwi_mask.nii.gz -fa dwi_FA.nii.gz dwi_tensor.nii.gz
 tensor2metric -force -mask dwi_mask.nii.gz -adc dwi_MD.nii.gz dwi_tensor.nii.gz
 tensor2metric -force -mask dwi_mask.nii.gz -ad dwi_AD.nii.gz dwi_tensor.nii.gz
 tensor2metric -force -mask dwi_mask.nii.gz -rd dwi_RD.nii.gz dwi_tensor.nii.gz
-
-#Generate quality checks
-mv dwipreproc-tmp-* dwiprep_files
-eddy_quad dwiprep_files/dwi_post_eddy -idx dwiprep_files/eddy_indices.txt -par dwiprep_files/eddy_config.txt -m dwi_mask.nii.gz -b dwiprep_files/bvals
