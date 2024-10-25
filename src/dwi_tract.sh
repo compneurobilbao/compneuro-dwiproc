@@ -35,7 +35,7 @@ antsApplyTransforms -d 3 -r anat_dwispace.nii.gz \
 	-i /app/brain_templates/${partition}.nii.gz -e 0 \
 	-t dwireg/standard2dwi1Warp.nii.gz \
 	-t dwireg/standard2dwi0GenericAffine.mat \
-	-o atlas_subSpace.nii.gz -n NearestNeighbor -v 1
+	-o ${partition}_subSpace.nii.gz -n NearestNeighbor -v 1
 
 #Generating ACT files
 timepoint=$(date +"%H:%M")
@@ -60,7 +60,7 @@ tckgen -backtrack -seed_gmwmi GMWMI.nii.gz -angle 45 -act act.nii.gz -mask dwi_m
     streamlines_iFOD2.tck -force 
 tcksift2  streamlines_iFOD2.tck dwi_fod.nii.gz sift_weights_iFOD2.txt -force 
 tck2connectome -zero_diagonal -symmetric -assignment_radial_search 5 \
-    -tck_weights_in sift_weights_iFOD2.txt -force streamlines_iFOD2.tck atlas_subSpace.nii.gz probabilistic_connectome.csv
+    -tck_weights_in sift_weights_iFOD2.txt -force streamlines_iFOD2.tck ${partition}_subSpace.nii.gz ${partition}_prob.csv
 
 #FACT deterministic tractography
 timepoint=$(date +"%H:%M")
@@ -71,4 +71,4 @@ tckgen -seed_gmwmi GMWMI.nii.gz -angle 45 -act act.nii.gz -mask dwi_mask.nii.gz 
     dwi_directions.nii.gz streamlines_FACT.tck
 
 tck2connectome -zero_diagonal -symmetric -assignment_radial_search 5 \
-    -force streamlines_FACT.tck atlas_subSpace.nii.gz deterministic_connectome.csv
+    -force streamlines_FACT.tck ${partition}_subSpace.nii.gz ${partition}_det.csv
