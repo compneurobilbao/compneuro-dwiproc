@@ -56,7 +56,7 @@ make dev
 
 ### Usage
 ```bash
-src/dwi_launcher.sh <partition>
+. src/dwi_launcher.sh <partition>
 ```
 
 * **partition**: brain partition used for computing the connectivity matrices. It should be in the MNI152_2mm space and dimensions. 
